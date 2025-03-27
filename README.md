@@ -5,19 +5,19 @@ This AI Assistant provide support to those who wish to make thier purchases more
 shopping-ai-assistant/
 
 ├── public/
-
+|   |
 │   ├── index.html
-
+|   |    
 │   ├── style.css
-
+|   |
 │   └── script.js
-
+|   
 ├── server/
-
+|   |
 │   ├── server.js
-
+|   |
 │   └── .env
-
+|
 └── package.json
 
 
