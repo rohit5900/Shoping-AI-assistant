@@ -30,4 +30,4 @@ cd shopping-ai-assistant
 npm install
 npm start
 
-then go to http://localhost:3000/
+then go to http://localhost:3001/
