@@ -3,88 +3,69 @@ const getRecBtn = document.getElementById('getRecBtn');
 const searchBtn = document.getElementById('searchBtn');
 const askBtn = document.getElementById('askBtn');
 const recommendationElement = document.getElementById('recommendation');
-const responseElement = document.getElementById('assistantResponse');
+const chatContainer = document.getElementById('chatContainer');
 
-// Event Listeners
-getRecBtn.addEventListener('click', getRecommendation);
-searchBtn.addEventListener('click', searchProducts);
-askBtn.addEventListener('click', getAIResponse);
-
-// Sample data (fallback)
+// Sample recommendations (fallback)
 const recommendations = [
-  "Sony WH-1000XM5 headphones - Best noise cancellation ($399)",
-  "Instant Pot Duo - 7-in-1 electric pressure cooker ($99)",
-  "Kindle Paperwhite - 6.8\" display with warm light ($139)"
+    {
+        title: "Noise-Cancelling Headphones",
+        items: [
+            "Sony WH-1000XM5 - $399 (Best overall)",
+            "Bose QuietComfort 45 - $329 (Most comfortable)",
+            "Apple AirPods Max - $549 (Best for Apple users)"
+        ]
+    },
+    {
+        title: "Kitchen Essentials",
+        items: [
+            "Instant Pot Duo - $99 (7-in-1 pressure cooker)",
+            "Vitamix 5200 - $449 (Professional blender)",
+            "All-Clad Stainless Cookware Set - $799 (Luxury cookware)"
+        ]
+    }
 ];
 
-const products = {
-  "laptop": ["MacBook Pro M2", "Dell XPS 13", "HP Spectre x360"],
-  "phone": ["iPhone 15", "Samsung Galaxy S23", "Google Pixel 7"],
-  "headphones": ["Sony WH-1000XM5", "Bose QuietComfort 45", "Apple AirPods Pro 2"]
-};
-
-// Display typing animation
+// Display functions
 function displayTypingResponse(text) {
-  responseElement.innerHTML = `
-    <strong style="color: #1a73e8;">AI Assistant:</strong> 
-    <span id="typingText" style="color: #ffffff;"></span>
-    <span class="typing"></span>
-  `;
-  
-  const typingElement = document.getElementById('typingText');
-  let i = 0;
-  const typing = setInterval(() => {
-    if (i < text.length) {
-      typingElement.textContent += text.charAt(i);
-      i++;
-    } else {
-      clearInterval(typing);
-      document.querySelector('.typing').style.display = 'none';
-    }
-  }, 20);
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'message ai-message fade-in';
+  messageDiv.innerHTML = `<strong>AI Assistant:</strong> ${text}`;
+  chatContainer.appendChild(messageDiv);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// Functions
-function getRecommendation() {
-  const randomIndex = Math.floor(Math.random() * recommendations.length);
-  recommendationElement.innerHTML = `
-    <strong style="color: #0d8a72;">Recommendation:</strong> 
-    <span style="color: #ffffff;">${recommendations[randomIndex]}</span>
-  `;
-  recommendationElement.classList.add('fade-in');
-  setTimeout(() => recommendationElement.classList.remove('fade-in'), 500);
+function addUserMessage(text) {
+  const messageDiv = document.createElement('div');
+  messageDiv.className = 'message user-message fade-in';
+  messageDiv.textContent = text;
+  chatContainer.appendChild(messageDiv);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-function searchProducts() {
-  const searchTerm = document.getElementById('search').value.toLowerCase();
-  let results = products[searchTerm] || 
-    Object.values(products).flat().filter(p => 
-      p.toLowerCase().includes(searchTerm)
-    );
-  
-  if (!results.length) {
-    results = ["No matches found. Try 'laptop', 'phone', or 'headphones'"];
+function showTypingIndicator() {
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'message ai-message typing';
+  typingDiv.id = 'typingIndicator';
+  chatContainer.appendChild(typingDiv);
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function hideTypingIndicator() {
+  const typingIndicator = document.getElementById('typingIndicator');
+  if (typingIndicator) {
+    typingIndicator.remove();
   }
-  
-  recommendationElement.innerHTML = `
-    <strong style="color: #1a73e8;">Results:</strong> 
-    <span style="color: #ffffff;">${results.join(', ')}</span>
-  `;
-  recommendationElement.classList.add('fade-in');
-  setTimeout(() => recommendationElement.classList.remove('fade-in'), 500);
 }
 
+// AI Response Function
 async function getAIResponse() {
   const query = document.getElementById('searchResults').value.trim();
-  const responseElement = document.getElementById('assistantResponse');
-  
-  if (!query) {
-    responseElement.innerHTML = "<span style='color: #b0b0b0;'>Please ask a shopping question.</span>";
-    return;
-  }
+  if (!query) return;
 
-  responseElement.innerHTML = "<em class='typing' style='color: #b0b0b0;'>Thinking...</em>";
-  
+  addUserMessage(query);
+  document.getElementById('searchResults').value = '';
+  showTypingIndicator();
+
   try {
     const response = await fetch('/api/ai-assistant', {
       method: 'POST',
@@ -93,34 +74,58 @@ async function getAIResponse() {
     });
     
     if (!response.ok) throw new Error(await response.text());
+    
     const data = await response.json();
+    hideTypingIndicator();
     displayTypingResponse(data.response);
     
   } catch (error) {
-    responseElement.innerHTML = `
-      <strong style="color: #ff6b6b;">Error:</strong> 
-      <span style="color: #ffffff;">${error.message || 'Service unavailable'}</span>
-    `;
-    responseElement.classList.add('error');
+    hideTypingIndicator();
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'message ai-message';
+    errorDiv.innerHTML = `<strong>Error:</strong> ${error.message || 'Unable to connect to AI service'}`;
+    chatContainer.appendChild(errorDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
   }
 }
 
-// Event listeners for buttons
-document.querySelectorAll('button').forEach(btn => {
-  btn.addEventListener('mousedown', () => {
-    btn.style.transform = 'translateY(1px)';
-    btn.style.boxShadow = 'none';
-  });
-  btn.addEventListener('mouseup', () => {
-    btn.style.transform = '';
-    btn.style.boxShadow = '';
-  });
-});
+// Product Search Function
+function searchProducts() {
+  const searchTerm = document.getElementById('search').value.toLowerCase();
+  if (!searchTerm) return;
+
+  const results = recommendations.find(rec => 
+    rec.title.toLowerCase().includes(searchTerm)
+  )?.items || ["Try searching for 'headphones' or 'kitchen'"];
+
+  recommendationElement.innerHTML = results.map(item => `
+    <div class="recommendation-card fade-in">
+      <p>${item}</p>
+    </div>
+  `).join('');
+}
+
+// Event Listeners
+askBtn.addEventListener('click', getAIResponse);
+searchBtn.addEventListener('click', searchProducts);
 
 // Enter key support
-document.getElementById('search').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') searchProducts();
-});
 document.getElementById('searchResults').addEventListener('keypress', (e) => {
-  if (e.key === 'Enter') getAIResponse();
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    getAIResponse();
+  }
 });
+
+document.getElementById('search').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    searchProducts();
+  }
+});
+
+// Initial recommendations
+recommendationElement.innerHTML = recommendations[0].items.map(item => `
+  <div class="recommendation-card fade-in">
+    <p>${item}</p>
+  </div>
+`).join('');
