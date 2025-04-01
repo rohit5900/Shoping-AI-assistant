@@ -4,23 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping AI Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Shopping AI Assistant</h1>
-    <p>Get personalized shopping recommendations from our AI assistant</p>
-    
-    <button id="getRecBtn">Get Recommendation</button>
-    <div id="recommendation"></div>
-    
-    <input type="text" id="search" placeholder="What product are you looking for?">
-    <button id="searchBtn">Search Products</button>
-    
-    <div id="Boxassist">
-        <h2>AI Shopping Assistant</h2>
-        <textarea id="searchResults" placeholder="Ask me anything about shopping... (e.g., 'Best budget smartphones', 'Where to buy organic groceries online')"></textarea>
-        <button id="askBtn">Ask Assistant</button>
-        <div id="assistantResponse" class="response-area"></div>
+    <div class="container">
+        <header class="header">
+            <h1>Shopping AI Assistant</h1>
+            <p class="subtitle">Get personalized recommendations from our AI shopping expert</p>
+        </header>
+
+        <div class="card">
+            <div class="chat-container" id="chatContainer">
+                <div class="message ai-message fade-in">
+                    <strong>AI Assistant:</strong> Hi there! I can help you find products, compare prices, and make shopping decisions. What are you looking for today?
+                </div>
+            </div>
+
+            <div class="input-card">
+                <div class="input-group">
+                    <textarea id="searchResults" placeholder="Ask about products, prices, or shopping advice..."></textarea>
+                    <button id="askBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="color: var(--dark-blue); margin-top: 0;">Product Search</h2>
+            <div class="input-group">
+                <input type="text" id="search" placeholder="Search for products...">
+                <button id="searchBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    Search
+                </button>
+            </div>
+            <div id="recommendation" class="recommendations"></div>
+        </div>
     </div>
 
     <script src="script.js"></script>
